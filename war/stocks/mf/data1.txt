@@ -1,0 +1,60 @@
+Alliance Capital Mutual Fund,Alliance
+BOB Mutual Fund,BOB
+Chola Mutual Fund,Chola
+Deutsche Mutual Fund,Deutsche,DWS
+DSP Merrill Lynch Investment Managers,DSP Merrill Lynch
+DSP Merrill Lynch Mutual Fund,DSP Merrill Lynch,DSP Merril Lynch 
+Dundee Mutual Funds,Dundee
+Escorts Mutual Fund,Escorts
+First India Mutual Fund,First India
+GIC Mutual Fund,GIC
+Standard Chartered Mutual Fund,Grindlays
+HDFC Mutual Fund,HDFC
+HSBC Mutual Fund,HSBC
+IDBI-PRINCIPAL,IDBI-PRINCIPAL
+IL&F S Mutual Fund,IL & FS
+IL&F S Mutual Fund,IL&fs
+ING Savings Trust,ING
+ING Vysya Mutual Fund,ING Vysya
+J M Mutual Fund,JM
+JM Financial Mutual Fund,JM 
+Kotak Mahindra Mutual Fund,Kotak
+LIC Mutual Fund,LIC
+LIC Mutual Fund,LICMF
+PNB Mutual Fund,PNB
+PRINCIPAL Mutual Fund,Principal
+Prudential ICICI Mutual Fund,Prudential ICICI,Prudential  ICICI ,ICICI Prudential 
+ICICI Prudential Mutual Fund,Prudential ICICI,Prudential  ICICI ,ICICI Prudential 
+Reliance Capital Mutual Fund,Reliance
+Reliance Mutual Fund,Reliance
+Sahara Mutual Fund,Sahara
+SBI Mutual Fund,SBI
+SBI Mutual Fund,Magnum
+SUN F&C Mutual Fund,SUN F&C
+Sundaram Mutual Fund,Sundaram
+Tata Mutual Fund,Tata
+Taurus Mutual Fund,Taurus
+Templeton Mutual Fund,Templeton
+Templeton Mutual Fund,Franklin India 
+UTI Mutual Fund(* Denotes schemes belonging to UTI-I),UTI
+UTI Mutual Fund(* Denotes schemes belonging to UTI-I),UTI -
+Zurich India Mutual Fund,Zurich India
+JF Mutual Fund,JF
+Benchmark Mutual Fund,Benchmark Fund of Funds -
+ABN  AMRO Mutual Fund,ABN  AMRO,ABN  AMRO,ABN AMRO,ABN  AMRO  
+Franklin Templeton Mutual Fund,Franlin India,FT India,Templeton India ,Templeton ,Franlin ,Franlin India
+Birla Sun Life Mutual Fund,Birla,Sun Life ,Sun Life
+Sundaram BNP Paribas Mutual Fund,Sundaram BNP Paribas,
+Zurich India Mutual Fund,Zurich India,Zurich India 
+DBS Chola Mutual Fund,DBS Chola,
+Fidelity Mutual Fund,Fidelity,
+Quantum Mutual Fund,Quantum,
+ING Mutual Fund,ING 
+Daiwa Mutual Fund,Daiwa
+Baroda Pioneer Mutual Fund,BARODA PIONEER 
+Canara Robeco Mutual Fund,Canara Robeco
+LIC NOMURA Mutual Fund,LIC NOMURA 
+IDFC Mutual Fund,IDFC 
+JPMorgan Mutual Fund,JPMorgan 
+Pramerica Mutual Fund,Pramerica 
+IIFL Mutual Fund,IIFL 

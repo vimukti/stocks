@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-configuration SYSTEM "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory>
+
+		<!-- configuration pool via c3p0 -->
+		<property name="hibernate.c3p0.acquire_increment">1</property>
+		<property name="hibernate.c3p0.idle_test_period">100</property><!-- seconds -->
+		<property name="hibernate.c3p0.max_size">100</property>
+		<property name="hibernate.c3p0.max_statements">100</property>
+		<property name="hibernate.c3p0.min_size">10</property>
+		<property name="hibernate.c3p0.timeout">100</property><!-- seconds -->
+		<!-- DEPRECATED very expensive property name="c3p0.validate> -->
+
+		<property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+		<property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="connection.url">jdbc:mysql://localhost:3306/stocks</property>
+		<property name="connection.username">${db.user}</property>
+		<property name="connection.password">${db.pass}</property>
+		<property name="connection.charSet">utf8</property>
+		<property name="hibernate.connection.isolation">2</property>
+		<property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+		<!-- Use the C3P0 connection pool provider -->
+		<property name="hibernate.hbm2ddl.auto">update</property>
+		<property name="hibernate.current_session_context_class">thread</property>
+		<!-- Show and print nice SQL on stdout -->
+		<property name="show_sql">false</property>
+		<property name="format_sql">true</property>
+		<mapping resource="mapping/stocks-mapping.xml" />
+		<mapping resource="mapping/stocks-queries.xml" />
+	</session-factory>
+</hibernate-configuration>

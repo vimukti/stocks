@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.vimukti.stocks.core"
+default-access="field" auto-import="false">
+	<class name="NseData" table="nsedata">
+		<id name="nsecode" column="nsecode"></id>
+		<property name="closePrice" column="closing"></property>
+		<property name="prevClPr" column="prevclose"></property>
+		<property name="volume" column="volume"></property>
+		<property name="hi52wk" column="high52"></property>
+		<property name="lo52wk" column="low52"></property>
+	</class>
+	<class name="BseData" table="bsedata">
+		<id name="bsecode" column="bsecode"></id>
+		<property name="date" column="date"></property>
+		<property name="closing" column="closing"></property>
+		<property name="prevclose" column="prevclose"></property>
+		<property name="volume" column="volume"></property>
+		<property name="high52" column="high52"></property>
+		<property name="low52" column="low52"></property>
+		<property name="wavg" column="wavg"></property>
+	</class>
+</hibernate-mapping>	

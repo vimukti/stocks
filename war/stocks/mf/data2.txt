@@ -1,0 +1,60 @@
+Fixed Maturity Series	FMS
+Select Debt	SD
+investment	Inv
+short	S
+term	T
+monthly	Mly
+annual	A
+Long	L
+income	In
+Quarterly	Qly
+Growth	Gr
+Dividend	Div
+Regular	Reg
+Institutional	Ins
+Premium	Prem
+premier	
+yearly	Yly
+plan	Pl
+maturity	Mat
+liquid	Liq
+Security	Sec
+Super Saver	
+Securities	Sec's
+Appreciation	App
+Millennium	Mill
+pls	plans
+Government	Gov
+Portfolio	Port
+Fixed	Fix
+Deposit	Dep
+Fixed Saving Scheme FSS
+Series	
+Select	Sel
+India Treasury Management Account  ITMA
+L T	LT
+ -	-
+Management	Mngt
+S T	ST
+Kotak Mahindra Mutual Fund K 
+Franklin	
+India In Builder Account	IIBA
+Deutsche  
+-	-
+ -	-
+K	
+Fix Saving Scheme	FSS
+Fix Saving Scheme-	FSS-
+UTI Gr Sector s- 
+High Interest - 
+Bond fund	B.Fn
+Div option\)	Div)
+Div option	Div
+Divivdend	Div
+Asset Allocation Fund	AAF
+Savings Plus Fund	Savings Plus
+Mutual Fund Unclaimed Dundee	MFUD-
+Franlin India	
+Standard Chartered	
+Floating Rate	Flo.Rate
+Option	

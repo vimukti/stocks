@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+	<sql-query name="get.all.company.bsecodes">
+		select bsecode from companies group by bsecode
+	</sql-query>
+	
+	<sql-query name="delete.nsedata">
+		delete from nsedata
+	</sql-query>
+	
+	<sql-query name="delete.bsedata">
+		delete from bsedata
+	</sql-query>
+	
+	<sql-query name="vartha.andhra">
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,d.volume as dsevolume,n.closing,n.prevclose,n.volume FROM companies as c left join bsedata as d on c.bsecode=d.bsecode left join nsedata as n on n.nsecode=c.nsecode where c.state='Andhra Pradesh' and d.volume>0 order by c.dname
+	</sql-query>
+	
+	<sql-query name="vartha.nse">
+		SELECT c.dname,n.closing,n.prevclose,n.volume FROM companies as c left join nsedata as n on n.nsecode=c.nsecode where n.volume>0 and c.nseindices like '%NIFTY%' order by c.dname
+	</sql-query>
+	
+	<sql-query name="vartha.nsejunior">
+		SELECT c.dname,n.closing,n.prevclose,n.volume FROM companies as c left join nsedata as n on n.nsecode=c.nsecode where n.volume>0 and c.nseindices like '%JUNIOR%' order by c.dname
+	</sql-query>
+	
+	<sql-query name="vartha.nseother">
+		SELECT c.dname,n.closing,n.prevclose,n.volume FROM companies as c left join nsedata as n on n.nsecode=c.nsecode where n.volume>0 and  c.nseindices not like '%JUNIOR%' and  c.nseindices not like '%NIFTY%' order by c.dname
+	</sql-query>
+	
+	<sql-query name="vartha.stocks.others">
+		<query-param name="cat" type="string" />
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,d.volume as dsevolume,n.closing,n.prevclose,n.volume FROM companies as c left join bsedata as d on c.bsecode=d.bsecode left join nsedata as n on n.nsecode=c.nsecode where c.cat=:cat and d.volume>0 and n.volume>0 order by c.dname
+	</sql-query>
+	
+	<sql-query name="vartha.stocks.nseonly">
+		SELECT c.dname,n.closing,n.prevclose,n.volume FROM companies as c left join bsedata as d on c.bsecode=d.bsecode left join nsedata as n on n.nsecode=c.nsecode where d.volume>0 and n.volume>0  and (d.volume is NULL OR d.volume=0) order by c.dname
+	</sql-query>
+	
+	<sql-query name="vartha.bse100">
+		SELECT c.name,bse.closing,bse.prevclose,bse.volume FROM companies c left join bsedata bse on bse.bsecode=c.bsecode where c.indices like '%BSE100%' and bse.closing is not null order by c.name
+	</sql-query>
+	
+	
+	<sql-query name="deccan">
+		<query-param name="cat" type="string" />
+		<query-param name="dhlimit" type="int" />
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,d.volume as dsevolume,d.high52,d.low52 FROM companies as c left join bsedata as d on c.bsecode=d.bsecode where c.cat=:cat and d.volume*d.closing>:dhlimit and d.closing>7 order by c.dname
+	</sql-query>
+	
+	<sql-query name="ap.stocks">
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,d.volume as dsevolume,n.closing,n.prevclose,n.volume FROM companies as c left join bsedata as d on c.bsecode=d.bsecode left join nsedata as n on n.nsecode=c.nsecode where c.state='Andhra Pradesh' and c.indices not like '%SENSEX%' and c.nseindices is null and d.volume>0 order by c.dname
+	</sql-query>
+	
+	<sql-query name="ap.bse500">
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,d.volume as dsevolume,n.closing,n.prevclose,n.volume FROM companies as c left join bsedata as d on c.bsecode=d.bsecode left join nsedata as n on n.nsecode=c.nsecode where c.indices like '%BSE500%' and d.volume>0 order by c.dname
+	</sql-query>
+	
+	<sql-query name="aj_special_data">
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,d.volume FROM companies as c left join bsedata as d on c.bsecode=d.bsecode where d.volume>0 and  c.cat = 'A' order by c.dname
+	</sql-query>
+	
+	<sql-query name="aj.stocks">
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,d.volume as dsevolume,n.closing,n.prevclose,n.volume FROM companies as c left join bsedata as d on c.bsecode=d.bsecode left join nsedata as n on n.nsecode=c.nsecode where c.state='Andhra Pradesh' and d.volume>0 order by c.dname
+	</sql-query>
+	
+	
+	<sql-query name="bsegl.topgains">
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,100*(d.closing-d.prevclose)/d.closing FROM companies as c left join bsedata as d on c.bsecode=d.bsecode where c.status='Active' and  c.indices like '%SENSEX%' order by 100*(d.closing-d.prevclose)/d.closing desc limit 10
+	</sql-query>
+	
+	<sql-query name="bsegl.toploses">
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,100*(d.closing-d.prevclose)/d.closing FROM companies as c left join bsedata as d on c.bsecode=d.bsecode where c.status='Active' and  c.indices like '%SENSEX%' order by 100*(d.closing-d.prevclose)/d.closing limit 10
+	</sql-query>
+	
+	<sql-query name="bsegl.topgain">
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,100*(d.closing-d.prevclose)/d.closing FROM companies as c left join bsedata as d on c.bsecode=d.bsecode where c.status='Active' and  c.indices not like '%SENSEX%' and d.prevclose&lt;&gt;0 and d.closing&lt;&gt;0 order by 100*(d.closing-d.prevclose)/d.closing desc limit 10
+	</sql-query>
+	
+	<sql-query name="bsegl.toplose">
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,100*(d.closing-d.prevclose)/d.closing FROM companies as c left join bsedata as d on c.bsecode=d.bsecode where c.status='Active' and  c.indices not like '%SENSEX%' and d.prevclose&lt;&gt;0 and d.closing&lt;&gt;0 order by 100*(d.closing-d.prevclose)/d.closing limit 10
+	</sql-query>	
+		
+	<sql-query name="get.total.count">
+		select count(*) from bsedata
+	</sql-query>
+	
+	<sql-query name="get.top.companies">
+		<query-param name="dhlimit" type="int" />
+		SELECT c.dname,d.closing as dseclosing,d.prevclose as dseprevclose,d.volume as dsevolume,d.high52,d.low52 FROM companies as c left join bsedata as d on c.bsecode=d.bsecode where c.cat='A' and d.volume*d.closing>:dhlimit and d.closing>7 order by c.dname limit 5
+	</sql-query>
+	
+</hibernate-mapping>
