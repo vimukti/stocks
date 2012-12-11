@@ -81,28 +81,28 @@ public class BseData {
 
 	public static BseData getInstance(String line) {
 		String[] values = line.split("#@#");
-		if (values.length < 60) {
+		if (values.length < 61) {
 			return null;
 		}
-		if (!istoday(values[60].split(" ")[0])) {
+		if (!istoday(values[61].split(" ")[0])) {
 			return null;
 		}
 		BseData data = new BseData();
 		data.bsecode = Integer.parseInt(values[2].trim());
 		data.date = new Date();
-		data.closing = getFloat(getNumberStr(values[14]));
-		data.prevclose = getFloat(values[20].replaceAll(",", "").split(" / ")[0]
+		data.closing = getFloat(getNumberStr(values[15]));
+		data.prevclose = getFloat(values[21].replaceAll(",", "").split(" / ")[0]
 				.trim());
-		String v = values[25].replaceAll(",", "").split(" / ")[0].trim();
+		String v = values[26].replaceAll(",", "").split(" / ")[0].trim();
 		double parseDouble = Double.parseDouble(v);
 		Double vl = new Double(parseDouble);
-		if (!values[24].trim().isEmpty()) {
+		if (!values[25].trim().isEmpty()) {
 			vl = vl * 100000;
 		}
 		data.volume = vl.intValue();
-		data.high52 = getFloat(getNumberStr(values[52]));
-		data.low52 = getFloat(getNumberStr(values[53]));
-		data.wavg = getFloat(getNumberStr(values[21]));
+		data.high52 = getFloat(getNumberStr(values[53]));
+		data.low52 = getFloat(getNumberStr(values[54]));
+		data.wavg = getFloat(getNumberStr(values[22]));
 		return data;
 	}
 
@@ -120,10 +120,14 @@ public class BseData {
 
 	@SuppressWarnings("deprecation")
 	private static boolean istoday(String string) {
-		Date date1 = new Date(string);
-		Date date2 = new Date();
-		return (date1.getYear() == date2.getYear()
-				&& date1.getMonth() == date2.getMonth() && date1.getDate() == date2
-				.getDate());
+		try {
+			Date date1 = new Date(string);
+			Date date2 = new Date();
+			return (date1.getYear() == date2.getYear()
+					&& date1.getMonth() == date2.getMonth() && date1.getDate() == date2
+					.getDate());
+		} catch (Exception e) {
+			return false;
+		}
 	}
 }

@@ -222,7 +222,7 @@ public class Stocks {
 		List list = session.getNamedQuery("get.all.company.bsecodes").list();
 		companyBseCodes = list;
 		List<Thread> threads = new ArrayList<Thread>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 50; i++) {
 			Thread thread = new Thread(new Runnable() {
 				@Override
 				public void run() {
