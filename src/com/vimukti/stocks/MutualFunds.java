@@ -284,7 +284,7 @@ public class MutualFunds extends Thread {
 			URL Url;
 			byte[] buf;
 			int byteRead = 0;
-			Url = new URL("http://amfiindia.com/NavReport.aspx?type=0");
+			Url = new URL("http://portal.amfiindia.com/spages/NAV0.txt");
 			outStream = new BufferedOutputStream(new FileOutputStream(new File(
 					parent, "amfinavdownload.txt")));
 
