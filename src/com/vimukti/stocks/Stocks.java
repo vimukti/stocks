@@ -18,7 +18,9 @@ import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -43,6 +45,7 @@ public class Stocks {
 	private final static int size = 1024;
 	private File parent;
 	private static String status = "";
+	private int totalDataFailed;
 
 	public Stocks(File parent) {
 		this.parent = parent;
@@ -211,7 +214,10 @@ public class Stocks {
 	}
 
 	private List<Integer> companyBseCodes;
+	private Map<Integer, Integer> requestCount;
 	private int index;
+	private int requestFailed;
+	private int requestRetryFailed;
 
 	private void getBseData() {
 		info("Downloading BseData started");
@@ -221,6 +227,7 @@ public class Stocks {
 		transaction.commit();
 		List list = session.getNamedQuery("get.all.company.bsecodes").list();
 		companyBseCodes = list;
+		requestCount = new HashMap<Integer, Integer>();
 		List<Thread> threads = new ArrayList<Thread>();
 		for (int i = 0; i < 50; i++) {
 			Thread thread = new Thread(new Runnable() {
@@ -258,6 +265,9 @@ public class Stocks {
 				e.printStackTrace();
 			}
 		}
+		info("Total failed:" + totalDataFailed);
+		info("Total Request failed:" + requestFailed);
+		info("Total Request Retry failed:" + requestRetryFailed);
 		info("Downloading BseData completed");
 	}
 
@@ -266,8 +276,26 @@ public class Stocks {
 			return null;
 		}
 		Integer integer = companyBseCodes.get(index++);
+		Integer count = requestCount.get(integer);
+		if (count == null) {
+			count = 0;
+		}
+		count++;
+		requestCount.put(integer, count);
+
 		info("Requesting bsedata :" + integer + ":" + index);
+
 		return String.valueOf(integer);
+	}
+
+	protected synchronized void addCode(String code) {
+		Integer c = Integer.valueOf(code);
+		Integer count = requestCount.get(c);
+		if (count < 5) {
+			companyBseCodes.add(c);
+		} else {
+			requestRetryFailed++;
+		}
 	}
 
 	private void makeRequest(String code, HttpClient client) throws Exception {
@@ -284,14 +312,25 @@ public class Stocks {
 
 		int status = client.executeMethod(method);
 		Session session = HibernateUtil.getCurrentSession();
+		InputStream inputStream = method.getResponseBodyAsStream();
+		byte[] data = new byte[inputStream.available()];
+		inputStream.read(data);
+		String string = new String(data);
+		info("Data (" + code + ")" + string);
 		if (status == HttpURLConnection.HTTP_OK) {
-			InputStream inputStream = method.getResponseBodyAsStream();
-			byte[] data = new byte[inputStream.available()];
-			inputStream.read(data);
-			BseData bseData = BseData.getInstance(new String(data));
+			info("Request:Ok");
+			BseData bseData = BseData.getInstance(string);
 			if (bseData != null) {
+				info("Status:Ok");
 				session.save(bseData);
+			} else {
+				info("Status:Fail");
+				totalDataFailed++;
 			}
+		} else {
+			addCode(code);
+			info("Request:" + status);
+			requestFailed++;
 		}
 	}
 
