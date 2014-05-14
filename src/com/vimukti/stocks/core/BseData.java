@@ -79,30 +79,59 @@ public class BseData {
 	public BseData() {
 	}
 
-	public static BseData getInstance(String line) {
-		String[] values = line.split("#@#");
-		if (values.length < 61) {
+	// public static BseData getInstance(String line, String high) {
+	// String[] values = line.split("#@#");
+	// if (values.length < 61) {
+	// return null;
+	// }
+	// if (!istoday(values[61].split(" ")[0])) {
+	// return null;
+	// }
+	// BseData data = new BseData();
+	// data.bsecode = Integer.parseInt(values[2].trim());
+	// data.date = new Date();
+	// data.closing = getFloat(getNumberStr(values[15]));
+	// data.prevclose = getFloat(values[21].replaceAll(",", "").split(" / ")[0]
+	// .trim());
+	// String v = values[26].replaceAll(",", "").split(" / ")[0].trim();
+	// double parseDouble = Double.parseDouble(v);
+	// Double vl = new Double(parseDouble);
+	// if (!values[25].trim().isEmpty()) {
+	// vl = vl * 100000;
+	// }
+	// data.volume = vl.intValue();
+	// data.high52 = getFloat(getNumberStr(values[53]));
+	// data.low52 = getFloat(getNumberStr(values[54]));
+	// data.wavg = getFloat(getNumberStr(values[22]));
+	// return data;
+	// }
+
+	public static BseData getInstance(String line, String high, String code) {
+		String[] values = line.split("#");
+		if (values.length < 6) {
 			return null;
 		}
-		if (!istoday(values[61].split(" ")[0])) {
+
+		// As on 13 May 14 | 15:59@C
+		String date = values[3].replaceFirst("As on ", "").replaceFirst(" \\|.+",
+				"");
+		if (!istoday(date)) {
 			return null;
 		}
+		values = values[6].split(",");
 		BseData data = new BseData();
-		data.bsecode = Integer.parseInt(values[2].trim());
+		data.bsecode = Integer.parseInt(code);
 		data.date = new Date();
-		data.closing = getFloat(getNumberStr(values[15]));
-		data.prevclose = getFloat(values[21].replaceAll(",", "").split(" / ")[0]
-				.trim());
-		String v = values[26].replaceAll(",", "").split(" / ")[0].trim();
-		double parseDouble = Double.parseDouble(v);
-		Double vl = new Double(parseDouble);
-		if (!values[25].trim().isEmpty()) {
-			vl = vl * 100000;
-		}
-		data.volume = vl.intValue();
-		data.high52 = getFloat(getNumberStr(values[53]));
-		data.low52 = getFloat(getNumberStr(values[54]));
-		data.wavg = getFloat(getNumberStr(values[22]));
+		data.closing = getFloat(values[4]);
+		data.prevclose = getFloat(values[0]);
+
+		String[] split = high.replaceAll("<.+?>", "\n")
+				.replaceAll("\n+", "\n").split("\n");
+
+		data.volume = 0;
+		data.high52 = getFloat(getNumberStr(split[3].replaceAll("\\(.+", "")));
+		data.low52 = getFloat(getNumberStr(split[5].replaceAll("\\(.+", "")));
+		data.wavg = getFloat("0");
 		return data;
 	}
 
@@ -129,5 +158,9 @@ public class BseData {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	public static void main(String[] args) {
+		System.out.println(istoday("13 May 14"));
 	}
 }

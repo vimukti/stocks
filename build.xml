@@ -3,7 +3,7 @@
 	<!--this file was created by Eclipse Runnable JAR Export Wizard-->
 	<!--ANT 1.7 is required                                        -->
 	<target name="create_run_jar">
-		<jar destfile="C:/stocks.jar" index="true">
+		<jar destfile="D:/stocks.jar" index="true">
 			<fileset file="./mapping">
 				<include name="mapping/**">
 				</include>

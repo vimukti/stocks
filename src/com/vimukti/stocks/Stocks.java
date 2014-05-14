@@ -27,6 +27,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -43,6 +44,7 @@ import com.vimukti.stocks.core.NseData;
 
 public class Stocks {
 	private final static int size = 1024;
+	private static final int THREADS = 50;
 	private File parent;
 	private static String status = "";
 	private int totalDataFailed;
@@ -218,6 +220,7 @@ public class Stocks {
 	private int index;
 	private int requestFailed;
 	private int requestRetryFailed;
+	private HashMap<String, Long> volumes;
 
 	private void getBseData() {
 		info("Downloading BseData started");
@@ -226,10 +229,15 @@ public class Stocks {
 		session.getNamedQuery("delete.bsedata").executeUpdate();
 		transaction.commit();
 		List list = session.getNamedQuery("get.all.company.bsecodes").list();
+		try {
+			volumes = getVolumes();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 		companyBseCodes = list;
 		requestCount = new HashMap<Integer, Integer>();
 		List<Thread> threads = new ArrayList<Thread>();
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < THREADS; i++) {
 			Thread thread = new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -239,6 +247,10 @@ public class Stocks {
 					try {
 						String code = getCode();
 						while (code != null) {
+							if (!volumes.containsKey(code)) {
+								code = getCode();
+								continue;
+							}
 							try {
 								makeRequest(code, client);
 							} catch (Exception e) {
@@ -271,6 +283,43 @@ public class Stocks {
 		info("Downloading BseData completed");
 	}
 
+	private HashMap<String, Long> getVolumes() throws HttpException,
+			IOException {
+		HttpClient client = new HttpClient();
+		GetMethod method = new GetMethod(
+				"http://www.bseindia.com/download/BhavCopy/Equity/EQ"
+						+ getDate() + "_CSV.ZIP");
+		method.addRequestHeader(
+				"User-Agent",
+				"Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.10) Gecko/20100915 Ubuntu/9.04 (jaunty) Firefox/3.6.10");
+		int status = client.executeMethod(method);
+		Session session = HibernateUtil.getCurrentSession();
+		InputStream inputStream = method.getResponseBodyAsStream();
+		ZipInputStream zis = new ZipInputStream(inputStream);
+		ZipEntry ze = zis.getNextEntry();
+
+		HashMap<String, Long> map = new HashMap<String, Long>();
+		while (ze != null) {
+			byte[] data = new byte[(int) ze.getSize()];
+			int remaining = data.length;
+			while (remaining != 0) {
+				remaining -= zis.read(data, data.length - remaining, remaining);
+			}
+			String[] split = new String(data).split("\n");
+			int count = 0;
+			for (String l : split) {
+				if (count == 0) {
+					count++;
+					continue;
+				}
+				String[] vals = l.split(",");
+				map.put(vals[0], Long.valueOf(vals[11]));
+			}
+			return map;
+		}
+		return null;
+	}
+
 	protected synchronized String getCode() {
 		if (index >= companyBseCodes.size()) {
 			return null;
@@ -300,9 +349,12 @@ public class Stocks {
 
 	private void makeRequest(String code, HttpClient client) throws Exception {
 		GetMethod method = new GetMethod(
-				"http://www.bseindia.com/bseplus/StockReach/AdvStockReach.aspx?scripcode="
-						+ code
-						+ "&section=tab1&IsPF=undefined&random=0.6778654475327867");
+				"http://www.bseindia.com/stock-share-price/SiteCache/EQHeaderData.aspx?text="
+						+ code);
+		// GetMethod method = new GetMethod(
+		// "http://www.bseindia.com/bseplus/StockReach/AdvStockReach.aspx?scripcode="
+		// + code
+		// + "&section=tab1&IsPF=undefined&random=0.6778654475327867");
 		method.addRequestHeader("Referer",
 				"http://www.bseindia.com/bseplus/StockReach/AdvanceStockReach.aspx?scripcode="
 						+ code);
@@ -316,12 +368,18 @@ public class Stocks {
 		byte[] data = new byte[inputStream.available()];
 		inputStream.read(data);
 		String string = new String(data);
+		String high = get52High(code, client);
 		info("Data (" + code + ")" + string);
 		if (status == HttpURLConnection.HTTP_OK) {
 			info("Request:Ok");
-			BseData bseData = BseData.getInstance(string);
+			BseData bseData = BseData.getInstance(string, high, code);
 			if (bseData != null) {
 				info("Status:Ok");
+				Long val = volumes.get(code);
+				if (val == null) {
+					val = 0l;
+				}
+				bseData.setVolume(val.intValue());
 				session.save(bseData);
 			} else {
 				info("Status:Fail");
@@ -332,6 +390,31 @@ public class Stocks {
 			info("Request:" + status);
 			requestFailed++;
 		}
+	}
+
+	private String get52High(String code, HttpClient client)
+			throws HttpException, IOException {
+		GetMethod method = new GetMethod(
+				"http://www.bseindia.com/stock-share-price/SiteCache/52WeekHigh.aspx?Type=EQ&text="
+						+ code);
+		// GetMethod method = new GetMethod(
+		// "http://www.bseindia.com/bseplus/StockReach/AdvStockReach.aspx?scripcode="
+		// + code
+		// + "&section=tab1&IsPF=undefined&random=0.6778654475327867");
+		method.addRequestHeader("Referer",
+				"http://www.bseindia.com/bseplus/StockReach/AdvanceStockReach.aspx?scripcode="
+						+ code);
+		method.addRequestHeader(
+				"User-Agent",
+				"Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.10) Gecko/20100915 Ubuntu/9.04 (jaunty) Firefox/3.6.10");
+
+		int status = client.executeMethod(method);
+		Session session = HibernateUtil.getCurrentSession();
+		InputStream inputStream = method.getResponseBodyAsStream();
+		byte[] data = new byte[inputStream.available()];
+		inputStream.read(data);
+		String string = new String(data);
+		return string;
 	}
 
 	private void getNseData() throws Exception {
@@ -386,6 +469,7 @@ public class Stocks {
 			out.close();
 			break;
 		}
+		in.close();
 		if (found) {
 			info("Found file:" + pdFileName);
 			Session session = HibernateUtil.getCurrentSession();
