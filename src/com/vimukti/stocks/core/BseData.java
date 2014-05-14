@@ -106,31 +106,35 @@ public class BseData {
 	// return data;
 	// }
 
-	public static BseData getInstance(String line, String high, String code) {
-		String[] values = line.split("#");
-		if (values.length < 6) {
-			return null;
-		}
+	public static BseData getInstance(String line, String high) {
+		//	0	SC_CODE		500410	
+		//	1	SC_NAME		ACC LTD	
+		//	2	SC_GROUP	A
+		//	3	SC_TYPE		Q
+		//	4	OPEN		1366.00
+		//	5	HIGH		1414.70
+		//	6	LOW			1366.00
+		//	7	CLOSE		1389.25
+		//	8	LAST		1389.25
+		//	9	PREVCLOSE	1348.00
+		//	10	NO_TRADES	4405
+		//	11	NO_OF_SHRS	48659
+		//	12	NET_TURNOV	67747213.00
+		String[] values = line.split(",");
 
-		// As on 13 May 14 | 15:59@C
-		String date = values[3].replaceFirst("As on ", "").replaceFirst(" \\|.+",
-				"");
-		if (!istoday(date)) {
-			return null;
-		}
-		values = values[6].split(",");
 		BseData data = new BseData();
-		data.bsecode = Integer.parseInt(code);
+		data.bsecode = Integer.parseInt(values[0]);
 		data.date = new Date();
-		data.closing = getFloat(values[4]);
-		data.prevclose = getFloat(values[0]);
+		data.closing = getFloat(values[7]);
+		data.prevclose = getFloat(values[9]);
 
-		String[] split = high.replaceAll("<.+?>", "\n")
-				.replaceAll("\n+", "\n").split("\n");
+		data.volume = Integer.parseInt(values[11]);
 
-		data.volume = 0;
+		String[] split = high.replaceAll("<.+?>", "\n").replaceAll("\n+", "\n")
+				.split("\n");
 		data.high52 = getFloat(getNumberStr(split[3].replaceAll("\\(.+", "")));
 		data.low52 = getFloat(getNumberStr(split[5].replaceAll("\\(.+", "")));
+		
 		data.wavg = getFloat("0");
 		return data;
 	}

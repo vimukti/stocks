@@ -220,7 +220,7 @@ public class Stocks {
 	private int index;
 	private int requestFailed;
 	private int requestRetryFailed;
-	private HashMap<String, Long> volumes;
+	private HashMap<String, String> volumes;
 
 	private void getBseData() {
 		info("Downloading BseData started");
@@ -283,7 +283,7 @@ public class Stocks {
 		info("Downloading BseData completed");
 	}
 
-	private HashMap<String, Long> getVolumes() throws HttpException,
+	private HashMap<String, String> getVolumes() throws HttpException,
 			IOException {
 		HttpClient client = new HttpClient();
 		GetMethod method = new GetMethod(
@@ -292,13 +292,12 @@ public class Stocks {
 		method.addRequestHeader(
 				"User-Agent",
 				"Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.10) Gecko/20100915 Ubuntu/9.04 (jaunty) Firefox/3.6.10");
-		int status = client.executeMethod(method);
-		Session session = HibernateUtil.getCurrentSession();
+		client.executeMethod(method);
 		InputStream inputStream = method.getResponseBodyAsStream();
 		ZipInputStream zis = new ZipInputStream(inputStream);
 		ZipEntry ze = zis.getNextEntry();
 
-		HashMap<String, Long> map = new HashMap<String, Long>();
+		HashMap<String, String> map = new HashMap<String, String>();
 		while (ze != null) {
 			byte[] data = new byte[(int) ze.getSize()];
 			int remaining = data.length;
@@ -313,7 +312,7 @@ public class Stocks {
 					continue;
 				}
 				String[] vals = l.split(",");
-				map.put(vals[0], Long.valueOf(vals[11]));
+				map.put(vals[0], l);
 			}
 			return map;
 		}
@@ -349,52 +348,6 @@ public class Stocks {
 
 	private void makeRequest(String code, HttpClient client) throws Exception {
 		GetMethod method = new GetMethod(
-				"http://www.bseindia.com/stock-share-price/SiteCache/EQHeaderData.aspx?text="
-						+ code);
-		// GetMethod method = new GetMethod(
-		// "http://www.bseindia.com/bseplus/StockReach/AdvStockReach.aspx?scripcode="
-		// + code
-		// + "&section=tab1&IsPF=undefined&random=0.6778654475327867");
-		method.addRequestHeader("Referer",
-				"http://www.bseindia.com/bseplus/StockReach/AdvanceStockReach.aspx?scripcode="
-						+ code);
-		method.addRequestHeader(
-				"User-Agent",
-				"Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.10) Gecko/20100915 Ubuntu/9.04 (jaunty) Firefox/3.6.10");
-
-		int status = client.executeMethod(method);
-		Session session = HibernateUtil.getCurrentSession();
-		InputStream inputStream = method.getResponseBodyAsStream();
-		byte[] data = new byte[inputStream.available()];
-		inputStream.read(data);
-		String string = new String(data);
-		String high = get52High(code, client);
-		info("Data (" + code + ")" + string);
-		if (status == HttpURLConnection.HTTP_OK) {
-			info("Request:Ok");
-			BseData bseData = BseData.getInstance(string, high, code);
-			if (bseData != null) {
-				info("Status:Ok");
-				Long val = volumes.get(code);
-				if (val == null) {
-					val = 0l;
-				}
-				bseData.setVolume(val.intValue());
-				session.save(bseData);
-			} else {
-				info("Status:Fail");
-				totalDataFailed++;
-			}
-		} else {
-			addCode(code);
-			info("Request:" + status);
-			requestFailed++;
-		}
-	}
-
-	private String get52High(String code, HttpClient client)
-			throws HttpException, IOException {
-		GetMethod method = new GetMethod(
 				"http://www.bseindia.com/stock-share-price/SiteCache/52WeekHigh.aspx?Type=EQ&text="
 						+ code);
 		// GetMethod method = new GetMethod(
@@ -413,8 +366,23 @@ public class Stocks {
 		InputStream inputStream = method.getResponseBodyAsStream();
 		byte[] data = new byte[inputStream.available()];
 		inputStream.read(data);
-		String string = new String(data);
-		return string;
+		String high = new String(data);
+		if (status == HttpURLConnection.HTTP_OK) {
+			info("Request:Ok");
+			String string = volumes.get(code);
+			BseData bseData = BseData.getInstance(string, high);
+			if (bseData != null) {
+				info("Status:Ok");
+				session.save(bseData);
+			} else {
+				info("Status:Fail");
+				totalDataFailed++;
+			}
+		} else {
+			addCode(code);
+			info("Request:" + status);
+			requestFailed++;
+		}
 	}
 
 	private void getNseData() throws Exception {
