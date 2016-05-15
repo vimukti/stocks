@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,15 +28,13 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.vimukti.stocks.client.AndraJyothi;
-import com.vimukti.stocks.client.AndraPrabha;
 import com.vimukti.stocks.client.Client;
-import com.vimukti.stocks.client.Dh;
-import com.vimukti.stocks.client.Vartha;
 import com.vimukti.stocks.core.BseData;
 import com.vimukti.stocks.core.HibernateUtil;
 import com.vimukti.stocks.core.NseData;
@@ -53,8 +50,7 @@ public class Stocks {
 		this.parent = parent;
 	}
 
-	public static List<String> createZipFeils(final File parent)
-			throws Exception {
+	public static List<String> createZipFeils(final File parent) throws Exception {
 		info("Started....:" + new Date());
 		parent.mkdirs();
 		Thread thread = new Thread(new Runnable() {
@@ -75,10 +71,10 @@ public class Stocks {
 		Session openSession = HibernateUtil.openSession();
 		List<String> list = new ArrayList<String>();
 		List<Client> clients = new ArrayList<Client>();
-		clients.add(new Vartha());
-		clients.add(new Dh());
+		// clients.add(new Vartha());
+		// clients.add(new Dh());
 		clients.add(new AndraJyothi());
-		clients.add(new AndraPrabha());
+		// clients.add(new AndraPrabha());
 
 		for (Client client : clients) {
 			try {
@@ -88,8 +84,8 @@ public class Stocks {
 				e.printStackTrace();
 			}
 		}
-		Stocks.copy(new File(parent, "andhra_jyothy.zip"), new File(parent,
-				"nt.zip"));
+		// Stocks.copy(new File(parent, "andhra_jyothy.zip"), new File(parent,
+		// "nt.zip"));
 		list.add("nt");
 		deleteFiles(parent);
 		openSession.close();
@@ -128,18 +124,13 @@ public class Stocks {
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
-		createZipFeils(new File("c:/naga"));
-	}
-
 	private void advDec() throws Exception {
 		info("Creating adv_dec.txt");
 		URL url = new URL("http://in.finance.yahoo.com/advances");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.connect();
 		if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					connection.getInputStream()));
+			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String data = "";
 			String inputLine;
 			while ((inputLine = in.readLine()) != null) {
@@ -192,8 +183,7 @@ public class Stocks {
 		info("Completed bsegl.txt");
 	}
 
-	private void createBsegl(FileWriter writer, String queryName)
-			throws Exception {
+	private void createBsegl(FileWriter writer, String queryName) throws Exception {
 		Session session = HibernateUtil.getCurrentSession();
 		Query query = session.getNamedQuery(queryName);
 		writer.write("\nCompany Name	Closing Price	Prev Close	%Change\n");
@@ -203,9 +193,8 @@ public class Stocks {
 			if (row[1] == null) {
 				continue;
 			}
-			writer.write(row[0] + "\t" + Double.parseDouble(row[1].toString())
-					+ "\t" + Double.parseDouble(row[2].toString()) + "\t"
-					+ getTwoDecimal(row[3]) + "\n");
+			writer.write(row[0] + "\t" + Double.parseDouble(row[1].toString()) + "\t"
+					+ Double.parseDouble(row[2].toString()) + "\t" + getTwoDecimal(row[3]) + "\n");
 		}
 	}
 
@@ -283,16 +272,17 @@ public class Stocks {
 		info("Downloading BseData completed");
 	}
 
-	private HashMap<String, String> getVolumes() throws HttpException,
-			IOException {
+	private HashMap<String, String> getVolumes() throws HttpException, IOException {
 		HttpClient client = new HttpClient();
 		GetMethod method = new GetMethod(
-				"http://www.bseindia.com/download/BhavCopy/Equity/EQ"
-						+ getDate() + "_CSV.ZIP");
-		method.addRequestHeader(
-				"User-Agent",
-				"Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.10) Gecko/20100915 Ubuntu/9.04 (jaunty) Firefox/3.6.10");
-		client.executeMethod(method);
+				"http://www.bseindia.com/download/BhavCopy/Equity/EQ" + getDate() + "_CSV.ZIP");
+		method.addRequestHeader("User-Agent",
+				"Mozilla/5.0 (Windows NT 10.0; WOW64; rv:41.0) Gecko/20100101 Firefox/41.0");
+		method.addRequestHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		method.addRequestHeader("Accept-Language", "en-US,en;q=0.5");
+		method.addRequestHeader("Accept-Encoding", "gzip, deflate");
+		method.addRequestHeader("Connection", "keep-alive");
+		int executeMethod = client.executeMethod(method);
 		InputStream inputStream = method.getResponseBodyAsStream();
 		ZipInputStream zis = new ZipInputStream(inputStream);
 		ZipEntry ze = zis.getNextEntry();
@@ -348,17 +338,14 @@ public class Stocks {
 
 	private void makeRequest(String code, HttpClient client) throws Exception {
 		GetMethod method = new GetMethod(
-				"http://www.bseindia.com/stock-share-price/SiteCache/52WeekHigh.aspx?Type=EQ&text="
-						+ code);
+				"http://www.bseindia.com/stock-share-price/SiteCache/52WeekHigh.aspx?Type=EQ&text=" + code);
 		// GetMethod method = new GetMethod(
 		// "http://www.bseindia.com/bseplus/StockReach/AdvStockReach.aspx?scripcode="
 		// + code
 		// + "&section=tab1&IsPF=undefined&random=0.6778654475327867");
 		method.addRequestHeader("Referer",
-				"http://www.bseindia.com/bseplus/StockReach/AdvanceStockReach.aspx?scripcode="
-						+ code);
-		method.addRequestHeader(
-				"User-Agent",
+				"http://www.bseindia.com/bseplus/StockReach/AdvanceStockReach.aspx?scripcode=" + code);
+		method.addRequestHeader("User-Agent",
 				"Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.10) Gecko/20100915 Ubuntu/9.04 (jaunty) Firefox/3.6.10");
 
 		int status = client.executeMethod(method);
@@ -393,8 +380,7 @@ public class Stocks {
 
 	private void loadData() throws Exception {
 		info("Loading NseData to DB");
-		FileInputStream fstream = new FileInputStream(new File(parent,
-				Stocks.getPdFileName()));
+		FileInputStream fstream = new FileInputStream(new File(parent, Stocks.getPdFileName()));
 		DataInputStream in = new DataInputStream(fstream);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String strLine;
@@ -415,8 +401,8 @@ public class Stocks {
 
 	private void extract() throws Exception {
 		BufferedOutputStream out = null;
-		ZipInputStream in = new ZipInputStream(new BufferedInputStream(
-				new FileInputStream(new File(parent, "PR.zip"))));
+		ZipInputStream in = new ZipInputStream(
+				new BufferedInputStream(new FileInputStream(new File(parent, "PR.zip"))));
 		ZipEntry entry;
 		String pdFileName = Stocks.getPdFileName();
 		info("Extracting " + pdFileName);
@@ -428,8 +414,7 @@ public class Stocks {
 			found = true;
 			int count;
 			byte data[] = new byte[1000];
-			out = new BufferedOutputStream(new FileOutputStream(new File(
-					parent, pdFileName)), 1000);
+			out = new BufferedOutputStream(new FileOutputStream(new File(parent, pdFileName)), 1000);
 			while ((count = in.read(data, 0, 1000)) != -1) {
 				out.write(data, 0, count);
 			}
@@ -454,33 +439,12 @@ public class Stocks {
 
 	private void download() {
 		info("Downloading PR.zip");
-		OutputStream outStream = null;
-		URLConnection uCon = null;
-
-		InputStream is = null;
 		try {
-			URL Url;
-			byte[] buf;
-			int byteRead = 0;
-			Url = new URL("http://www.nseindia.com/content/equities/PR.zip");
-			outStream = new BufferedOutputStream(new FileOutputStream(new File(
-					parent, "PR.zip")));
-
-			uCon = Url.openConnection();
-			is = uCon.getInputStream();
-			buf = new byte[size];
-			while ((byteRead = is.read(buf)) != -1) {
-				outStream.write(buf, 0, byteRead);
-			}
+			FileUtils.copyURLToFile(new URL("https://www.nseindia.com/content/equities/PR.zip"),
+					new File(parent, "PR.zip"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				is.close();
-				outStream.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			info("Completed.");
 		}
 	}
@@ -535,8 +499,7 @@ public class Stocks {
 
 	public static void makeZip(File parent, String name) throws Exception {
 		byte[] buffer = new byte[18024];
-		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
-				new File(parent, name + ".zip")));
+		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(parent, name + ".zip")));
 		out.setLevel(Deflater.DEFAULT_COMPRESSION);
 		File[] files = new File(parent, name).listFiles();
 		for (File file : files) {
